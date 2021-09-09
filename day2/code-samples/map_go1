@@ -1,0 +1,126 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func demoEnglishDictionary() {
+	dict := make(map[string]string)
+	dict["hello"] = "xin chào"
+	dict["bye"] = "tạm biệt"
+	dict["what to eat?"] = "ăn gì?"
+	dict["kiss"] = "hôn"
+	for key, value := range dict {
+		fmt.Println(key, " : ", value)
+	}
+}
+
+func demoMapInterface() {
+	config := make(map[string]interface{})
+	//var config map[string]interface{}
+	config["host"] = "localhost"
+	config["port"] = 8080
+	config["user"] = "rock"
+	config["pass"] = "@123k9"
+	config["TLS"] = true
+
+	for key, value := range config {
+		fmt.Println(key, " : ", value)
+	}
+
+}
+
+func demoMapList() {
+	type Node struct {
+		Next  *Node
+		Value interface{}
+	}
+
+	var first *Node
+	vivisted := make(map[*Node]bool)
+	for n := first; n != nil; n = n.Next {
+		if vivisted[n] {
+			fmt.Println("cycle detected")
+			break
+		}
+		vivisted[n] = true
+		fmt.Println(n.Value)
+	}
+}
+
+func likesMapList() {
+	type Person struct {
+		Name  string
+		Likes []string
+	}
+
+	var people []*Person
+	likes := make(map[string][]*Person)
+
+	for _, p := range people {
+		for _, l := range p.Likes {
+			likes[l] = append(likes[l], p)
+		}
+	}
+
+	for _, p := range likes["cheese"] {
+		fmt.Println(p.Name, " likes cheese")
+	}
+}
+
+func add(m map[string]map[string]int, path, country string) {
+	mm, ok := m[path]
+	if !ok {
+		mm = make(map[string]int)
+		m[path] = mm
+	}
+	mm[country]++
+}
+
+func main() {
+	//demoMapInterface()
+	//demoMapList()
+
+	/*
+		hits := make(map[string]map[string]int)
+		add(hits, "/doc/", "au")
+		add(hits, "/doc/", "au")
+		add(hits, "/doc/", "au")
+
+		fmt.Println(hits["/doc/"]["au"])
+	*/
+	type Key struct {
+		Path, Country string
+	}
+	hits := make(map[Key]int)
+
+	hits[Key{"/", "vn"}]++
+	hits[Key{"/", "vn"}]++
+
+	hits[Key{"/", "au"}]++
+	hits[Key{"/", "au"}]++
+
+	fmt.Println(hits[Key{"/", "vn"}])
+	fmt.Println(hits[Key{"/", "au"}])
+
+	var counter = struct {
+		sync.RWMutex
+		m map[string]int
+	}{m: make(map[string]int)}
+	counter.RLock()
+	counter.m["some_key"]++
+	counter.RUnlock()
+
+	counter.RLock()
+	counter.m["some_key"]++
+	counter.RUnlock()
+	fmt.Println(counter.m["some_key"])
+
+	cars := []string{"Toyota", "M1", "M2"}
+
+	for i := 0; i < len(cars); i++ {
+		fmt.Println(cars[len(cars)-1])
+	}
+
+}

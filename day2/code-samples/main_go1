@@ -1,0 +1,59 @@
+/*
+package main
+
+import "fmt"
+
+func main() {
+*/
+
+//demoArray2d()
+/*
+	fmt.Println("")
+	indexLoop()
+	fmt.Println("")
+	whileLoop()
+	fmt.Println("")
+	rangeLoop()
+	fmt.Println("")
+*/
+/*
+	reserveLoop()
+	fmt.Println()
+	rawReserveLoop()
+*/
+/*
+	demoEnglishTranslation()
+	fmt.Println()
+	demoMapInterface()
+*/
+/*
+	greeting()
+	fmt.Println()
+*/
+/*
+	demoStruct()
+	fmt.Println()
+*/
+/*
+	demoError()
+	fmt.Println()
+*/
+/*
+	sortIntSlice()
+	fmt.Println()
+	sortReverse()
+*/
+
+//sortSliceWithFunc()
+
+//sortSliceStable()
+//search()
+
+//demoSlice()
+//fmt.Println(removeItemSliceNotKeepOrder([]string{"a", "b", "c", "d"}, 1))
+//fmt.Println(reserveKeepOriginSlice([]string{"a", "b", "c", "d"}))
+//fmt.Println(removeDuplicate([]string{"a", "b", "a", "c"}))
+/*
+	fmt.Println(reserveSliceAnyType([]interface{}{1, 2, 3, 4}))
+}
+*/
