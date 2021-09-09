@@ -21,7 +21,19 @@ func SecondLargestNumber1(i []int) (int, error) {
 	}
 
 	sort.Ints(i)
-	return i[len(i)-2], nil
+
+	max2ndIndex := len(i) - 2
+	for {
+		if max2ndIndex < 0 {
+			return 0, errors.New("not found max2d")
+		}
+
+		if i[max2ndIndex] == i[max2ndIndex+1] && max2ndIndex >= 0 {
+			max2ndIndex--
+		} else {
+			return i[max2ndIndex], nil
+		}
+	}
 }
 
 /*
@@ -36,13 +48,17 @@ func SecondLargestNumber2(i []int) (int, error) {
 		return 0, errors.New("array length is less than 2")
 	}
 
-	_, maxIndex, _ := findMaxNumber(i)
+	maxValue, _, _ := findMaxNumber(i)
 	max2nd := i[0]
 
-	for index, value := range i {
-		if max2nd < value && index != maxIndex {
+	for _, value := range i {
+		if max2nd < value && value != maxValue {
 			max2nd = value
 		}
+	}
+
+	if max2nd == maxValue {
+		return 0, errors.New("not found max2d")
 	}
 
 	return max2nd, nil
