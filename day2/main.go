@@ -1,17 +1,13 @@
 package main
 
 import (
-	"day2/bai4"
+	"day2/bai1"
 	"fmt"
 )
 
 func main() {
-	people := []bai4.Employee{
-		{"Gopher", 70, 7},
-		{"Alice", 55, 5},
-		{"Vera", 55, 5},
-		{"Bob", 75, 2},
+	_, err := bai1.SecondLargestNumber2([]int{2, 1, 4, 4})
+	if err != nil {
+		fmt.Println("error")
 	}
-	max2ndSalaryPeople := bai4.ListEmployeeIsMax2nd(people)
-	fmt.Println(max2ndSalaryPeople)
 }
