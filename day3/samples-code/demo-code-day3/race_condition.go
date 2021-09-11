@@ -46,12 +46,14 @@ func incSync2(wg *sync.WaitGroup) {
 }
 
 func demoIncSync2() {
-	x = 0
-	for i := 0; i < 1000; i++ {
-		w.Add(1)
-		go demoIncSync2(&w)
-	}
-	w.Wait()
+	/*
+		x = 0
+		for i := 0; i < 1000; i++ {
+			w.Add(1)
+			go demoIncSync2(&w)
+		}
+		w.Wait()
+	*/
 	fmt.Println("final value of x", x)
 }
 

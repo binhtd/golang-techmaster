@@ -1,5 +1,10 @@
 package main
 
+type Person struct {
+	Name string
+	Age  int
+}
+
 func main() {
 	//DemoOperator()
 
@@ -9,5 +14,31 @@ func main() {
 		   name = "John", roles = {"admin", "trainer"}, age = 50, enabled = true
 		})
 	*/
-	DemoPointer()
+	//DemoPointer()
+
+	//DemoBasicPointer()
+
+	//DemoIntReceiver()
+	//DemoSliceIntReceiver()
+
+	//DemoSwap()
+	//DemoSwapTwoStructs()
+
+	//DemoPointerStruct()
+
+	//demoInterface()
+	//ArgumentToPrintlnEscapeToHeap()
+
+	//InterfaceArgumentEscapeToHeap()
+
+	//LargeSliceToHeap()
+
+	//SmallSliceToStack()
+
+	//WillReceiverEscapeToHeap()
+
+	//ReturnArrayFromFunc()
+
+	//ReturnASlice(100)
+	demoSet()
 }

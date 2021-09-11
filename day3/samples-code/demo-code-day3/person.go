@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-type Person struct {
+type Person1 struct {
 	FirstName string
 	LastName  string
 	Age       int
@@ -15,38 +15,38 @@ type Address struct {
 }
 
 //init function
-func NewAPerson(firstName string, lastName string, age int) *Person {
+func NewAPerson(firstName string, lastName string, age int) *Person1 {
 	if age < 0 {
 		return nil
 	}
-	p := new(Person)
+	p := new(Person1)
 	p.FirstName = firstName
 	p.LastName = lastName
 	p.Age = age
 	return p
 }
 
-func BuildPerson() *Person {
-	return new(Person)
+func BuildPerson() *Person1 {
+	return new(Person1)
 }
 
-func (p *Person) WithFirstName(firstName string) *Person {
+func (p *Person1) WithFirstName(firstName string) *Person1 {
 	p.FirstName = firstName
 	return p
 }
 
-func (p *Person) WithLastNem(lastName string) *Person {
+func (p *Person1) WithLastNem(lastName string) *Person1 {
 	p.LastName = lastName
 	return p
 }
 
-func (p *Person) WithAge(age int) *Person {
+func (p *Person1) WithAge(age int) *Person1 {
 	p.Age = age
 	return p
 }
 
 func demoStruct() {
-	person := Person{"le", "nam", 32, Address{"vietnam", "hanoi"}}
+	person := Person1{"le", "nam", 32, Address{"vietnam", "hanoi"}}
 	fmt.Println(person)
 
 	p1 := BuildPerson().WithFirstName("da").WithLastNem("la").WithAge(52)
