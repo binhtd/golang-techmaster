@@ -13,6 +13,7 @@ const calendarActiveDayColor = "\033[32m"
 const calendarColorReset = "\033[0m"
 const calendarIsPrintColorInActiveDay = true
 const calendarPaddingCharacter = " "
+const calendarNumberColumnInARow = 7
 
 func main() {
 	printCalendarTitle()
@@ -122,7 +123,7 @@ func printDayInTheMonth(dayInTheMonth string) {
 print break line after each row of calendar
 */
 func printBreakLineOneCalendarRow(i int) {
-	if (i+1)%7 == 0 {
+	if (i+1)%calendarNumberColumnInARow == 0 {
 		fmt.Println("")
 	}
 }
