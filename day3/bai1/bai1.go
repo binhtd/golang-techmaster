@@ -118,6 +118,9 @@ func printDayInTheMonth(dayInTheMonth string) {
 	fmt.Print(dayInTheMonth)
 }
 
+/*
+print break line after each row of calendar
+*/
 func printBreakLineOneCalendarRow(i int) {
 	if (i+1)%7 == 0 {
 		fmt.Println("")
