@@ -82,7 +82,7 @@ func getWeekDayOfTheFirstDayOfTheMonth() int {
 }
 
 /*
-format from beginning of week to first day of the month
+format from beginning of week to first day of the month, sunday is 0, saturday is 6
 */
 func formatPrintingToFirstDayOfTheMonth(calendarBody []string, firstWeekDay int) []string {
 	for weekDay := 0; weekDay <= 6; weekDay++ {
