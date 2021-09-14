@@ -8,7 +8,7 @@ import (
 )
 
 const calendarColumnWidth = 3
-const calendarPaddingLeftToRight = true
+const calendarPaddingLeftToRight = false
 const calendarActiveDayColor = "\033[32m"
 const calendarColorReset = "\033[0m"
 const calendarIsPrintColorInActiveDay = true
