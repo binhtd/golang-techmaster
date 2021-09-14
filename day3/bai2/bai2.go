@@ -22,30 +22,59 @@ const containerAllState = 3
 
 func main() {
 	argsWithProg := os.Args
-	var actionVerb, actionVerbParameter string
 
-	if len(argsWithProg) >= 3 {
-		actionVerb = argsWithProg[1]
-		actionVerbParameter = getContainerID(argsWithProg[2])
-
-		if actionVerbParameter == "" {
-			actionVerbParameter = argsWithProg[2]
-		}
-
-		if strings.Contains(actionVerb, "start") {
-			startContainer(actionVerbParameter)
-			return
-		}
-
-		if strings.Contains(actionVerb, "stop") {
-			stopContainer(actionVerbParameter)
-			return
-		}
+	if len(argsWithProg) >= 3 && strings.Contains("start", argsWithProg[1]) {
+		startContainer(argsWithProg[1])
+		return
 	}
-	getKeyPress()
+
+	if len(argsWithProg) >= 3 && strings.Contains("stop", argsWithProg[1]) {
+		stopContainer(argsWithProg[1])
+		return
+	}
+
+	printDefaultActionResult()
 }
 
+/*
+print default result when not input any parameter
+*/
+func printDefaultActionResult() {
+	ch := make(chan string)
+	go func(ch chan string) {
+		// disable input buffering
+		exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
+		// do not display entered characters on the screen
+		var b = make([]byte, 1)
+		for {
+			os.Stdin.Read(b)
+			ch <- string(b)
+		}
+	}(ch)
+
+	for {
+		printListContainer()
+		stdin, _ := <-ch
+
+		if stdin == "l" {
+			c := exec.Command("clear")
+			c.Stdout = os.Stdout
+			c.Run()
+			mode++
+		}
+		if mode > 3 {
+			mode = mode % 3
+		}
+	}
+}
+
+/*
+print list of container
+*/
 func printListContainer() {
+	fmt.Println("----------------------------------------------------------------------------------------------------------")
+	fmt.Println("Press keyboard l to switch mode, first time is running, second time is exited, third time is all")
+	fmt.Println()
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		panic(err)
@@ -63,6 +92,9 @@ func printListContainer() {
 	}
 }
 
+/*
+get container filter by selected mode
+*/
 func getContainerFilter() types.ContainerListOptions {
 	switch mode {
 	case containerRunningState:
@@ -82,34 +114,9 @@ func getContainerFilter() types.ContainerListOptions {
 	}
 }
 
-func getKeyPress() {
-
-	ch := make(chan string)
-	go func(ch chan string) {
-		// disable input buffering
-		exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-		// do not display entered characters on the screen
-		var b = make([]byte, 1)
-		for {
-			os.Stdin.Read(b)
-			ch <- string(b)
-		}
-	}(ch)
-
-	for {
-		printListContainer()
-		stdin, _ := <-ch
-
-		if stdin == "l" {
-			fmt.Println("\033[2J")
-			mode++
-		}
-		if mode > 3 {
-			mode = mode % 3
-		}
-	}
-}
-
+/*
+format port information
+*/
 func getContainerPortInfo(ports []types.Port) string {
 	containerPortInfo := ""
 	for _, port := range ports {
@@ -118,6 +125,9 @@ func getContainerPortInfo(ports []types.Port) string {
 	return strings.TrimRight(containerPortInfo, ", ")
 }
 
+/*
+stop container by container id
+*/
 func stopContainer(containerID string) {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
@@ -129,6 +139,9 @@ func stopContainer(containerID string) {
 	}
 }
 
+/*
+start container by containerId
+*/
 func startContainer(containerID string) {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
@@ -140,6 +153,9 @@ func startContainer(containerID string) {
 	}
 }
 
+/*
+get containerID from container name
+*/
 func getContainerID(containerName string) string {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
@@ -156,5 +172,5 @@ func getContainerID(containerName string) string {
 			return container.ID
 		}
 	}
-	return ""
+	return containerName
 }
