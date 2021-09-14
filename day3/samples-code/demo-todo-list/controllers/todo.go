@@ -1,24 +1,41 @@
 package controllers
 
 import (
-	"fmt"
-	"strconv"
+	"demo-todo-list/config"
+	"os"
+	"time"
+
+	"demo-todo-list/models"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson" // new
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	// new
+	// new
 )
 
-type Todo struct {
-	Id        int    `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
-}
-
-var todos = []*Todo{
-	{Id: 1, Title: "Walk the dog", Completed: false},
-	{Id: 2, Title: "Walk the cat", Completed: false},
-}
-
 func GetTodos(c *fiber.Ctx) error {
+	todoCollection := config.MI.DB.Collection("TODO_COLLECTION")
+	query := bson.D{{}}
+
+	cursor, err := todoCollection.Find(c.Context(), query)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"sucess":  false,
+			"message": "Something went wrong",
+			"error":   err.Error(),
+		})
+	}
+	var todos []models.Todo = make([]models.Todo, 0)
+	err = cursor.All(c.Context(), &todos)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"sucess":  false,
+			"message": "Something went wrong",
+			"error":   err.Error(),
+		})
+	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"data": fiber.Map{
@@ -28,24 +45,43 @@ func GetTodos(c *fiber.Ctx) error {
 }
 
 func CreateTodo(c *fiber.Ctx) error {
-	type Request struct {
-		Title string `json:"title"`
-	}
-	var body Request
-	err := c.BodyParser(&body)
+	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
 
+	data := new(models.Todo)
+
+	err := c.BodyParser(&data)
+
+	// if error
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Cannot parse JSON",
+			"error":   err,
 		})
 	}
-	todo := &Todo{
-		Id:        len(todos) + 1,
-		Title:     body.Title,
-		Completed: false,
+
+	data.ID = nil
+	f := false
+	data.Completed = &f
+	data.CreatedAt = time.Now()
+	data.UpdatedAt = time.Now()
+
+	result, err := todoCollection.InsertOne(c.Context(), data)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Cannot insert todo",
+			"error":   err,
+		})
 	}
+
+	// get the inserted data
+	todo := &models.Todo{}
+	query := bson.D{{Key: "_id", Value: result.InsertedID}}
+
+	todoCollection.FindOne(c.Context(), query).Decode(todo)
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"data": fiber.Map{
@@ -55,77 +91,121 @@ func CreateTodo(c *fiber.Ctx) error {
 }
 
 func GetTodo(c *fiber.Ctx) error {
-	paramId := c.Params("id")
-	id, err := strconv.Atoi(paramId)
+	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
+
+	// get parameter value
+	paramID := c.Params("id")
+
+	// convert parameterID to objectId
+	id, err := primitive.ObjectIDFromHex(paramID)
+
+	// if error while parsing paramID
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Cannot parse Id",
+			"error":   err,
 		})
 	}
 
-	for _, todo := range todos {
-		if todo.Id == id {
-			return c.Status(fiber.StatusOK).JSON(fiber.Map{
-				"success": true,
-				"data": fiber.Map{
-					"todo": todo,
-				},
-			})
-		}
+	// find todo and return
+
+	todo := &models.Todo{}
+
+	query := bson.D{{Key: "_id", Value: id}}
+
+	err = todoCollection.FindOne(c.Context(), query).Decode(todo)
+
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "Todo Not found",
+			"error":   err,
+		})
 	}
-	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-		"success": false,
-		"message": "Todo not found",
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"data": fiber.Map{
+			"todo": todo,
+		},
 	})
 }
 
 func UpdateTodo(c *fiber.Ctx) error {
-	paramId := c.Params("id")
-	id, err := strconv.Atoi(paramId)
+	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
+
+	// find parameter
+	paramID := c.Params("id")
+
+	// convert parameterID to objectId
+	id, err := primitive.ObjectIDFromHex(paramID)
+
+	// if parameter cannot parse
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Cannot parse id",
+			"error":   err,
 		})
 	}
 
-	type Request struct {
-		Title     *string `json:"title"`
-		Completed *bool   `json:"completed"`
-	}
+	// var data Request
+	data := new(models.Todo)
+	err = c.BodyParser(&data)
 
-	var body Request
-	err = c.BodyParser(&body)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Cannot parse JSON",
+			"error":   err,
 		})
 	}
 
-	var todo *Todo
-	for _, t := range todos {
-		if t.Id == id {
-			todo = t
-			break
+	query := bson.D{{Key: "_id", Value: id}}
+
+	// updateData
+	var dataToUpdate bson.D
+
+	if data.Title != nil {
+		// todo.Title = *data.Title
+		dataToUpdate = append(dataToUpdate, bson.E{Key: "title", Value: data.Title})
+	}
+
+	if data.Completed != nil {
+		// todo.Completed = *data.Completed
+		dataToUpdate = append(dataToUpdate, bson.E{Key: "completed", Value: data.Completed})
+	}
+
+	dataToUpdate = append(dataToUpdate, bson.E{Key: "updatedAt", Value: time.Now()})
+
+	update := bson.D{
+		{Key: "$set", Value: dataToUpdate},
+	}
+
+	// update
+	err = todoCollection.FindOneAndUpdate(c.Context(), query, update).Err()
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"success": false,
+				"message": "Todo Not found",
+				"error":   err,
+			})
 		}
-	}
 
-	if todo.Id == 0 {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": "Not found",
+			"message": "Cannot update todo",
+			"error":   err,
 		})
 	}
 
-	if body.Title != nil {
-		todo.Title = *body.Title
-	}
+	// get updated data
+	todo := &models.Todo{}
 
-	if body.Completed != nil {
-		todo.Completed = *body.Completed
-	}
+	todoCollection.FindOne(c.Context(), query).Decode(todo)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
@@ -136,36 +216,43 @@ func UpdateTodo(c *fiber.Ctx) error {
 }
 
 func DeleteTodo(c *fiber.Ctx) error {
-	// get param
-	paramId := c.Params("id")
+	todoCollection := config.MI.DB.Collection(os.Getenv("TODO_COLLECTION"))
 
-	// convert param string to int
-	id, err := strconv.Atoi(paramId)
+	// get param
+	paramID := c.Params("id")
+
+	// convert parameter to object id
+	id, err := primitive.ObjectIDFromHex(paramID)
 
 	// if parameter cannot parse
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Cannot parse id",
+			"error":   err,
 		})
 	}
 
 	// find and delete todo
-	for i, todo := range todos {
-		if todo.Id == id {
+	query := bson.D{{Key: "_id", Value: id}}
 
-			todos = append(todos[:i], todos[i+1:]...)
+	err = todoCollection.FindOneAndDelete(c.Context(), query).Err()
 
-			return c.Status(fiber.StatusNoContent).JSON(fiber.Map{
-				"success": true,
-				"message": "Deleted Succesfully",
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"success": false,
+				"message": "Todo Not found",
+				"error":   err,
 			})
 		}
+
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Cannot delete todo",
+			"error":   err,
+		})
 	}
 
-	// if todo not found
-	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-		"success": false,
-		"message": "Todo not found",
-	})
+	return c.SendStatus(fiber.StatusNoContent)
 }
