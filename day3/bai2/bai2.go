@@ -23,17 +23,31 @@ const containerAllState = 3
 func main() {
 	argsWithProg := os.Args
 
-	if len(argsWithProg) >= 3 && strings.Contains("start", argsWithProg[1]) {
-		startContainer(argsWithProg[1])
+	if canStartContainer(argsWithProg) {
+		startContainer(getContainerID(argsWithProg[2]))
 		return
 	}
 
-	if len(argsWithProg) >= 3 && strings.Contains("stop", argsWithProg[1]) {
-		stopContainer(argsWithProg[1])
+	if canStopContainer(argsWithProg) {
+		stopContainer(getContainerID(argsWithProg[2]))
 		return
 	}
 
 	printDefaultActionResult()
+}
+
+/*
+check start command can run
+*/
+func canStartContainer(argsWithProg []string) bool {
+	return len(argsWithProg) >= 3 && strings.Contains("start", argsWithProg[1])
+}
+
+/*
+check stop command can run
+*/
+func canStopContainer(argsWithProg []string) bool {
+	return len(argsWithProg) >= 3 && strings.Contains("stop", argsWithProg[1])
 }
 
 /*
