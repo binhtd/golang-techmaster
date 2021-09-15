@@ -18,6 +18,9 @@ func main() {
 	}
 }
 
+/*
+get user input directory info
+*/
 func getInputData() string {
 	if len(os.Args) > 1 {
 		return strings.TrimSuffix(os.Args[1], "/")
@@ -31,6 +34,9 @@ func getInputData() string {
 	return strings.TrimSuffix(dir, "/")
 }
 
+/*
+print each entry in tree
+*/
 func printFile(directory string, ignoreDirs []string) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -51,6 +57,9 @@ func printFile(directory string, ignoreDirs []string) filepath.WalkFunc {
 	}
 }
 
+/*
+format each entry in tree
+*/
 func formatPrintingPath(directory string, path string) string {
 	formatPath := removeTopDirectoryAndBeginSlashAndEndingSlash(directory, path)
 	if isTopTreeDirectory(formatPath) {
@@ -62,6 +71,9 @@ func formatPrintingPath(directory string, path string) string {
 	return strings.Repeat("│   ", nestedLevel-1) + fmt.Sprintf("├── %s", filepath.Base(formatPath))
 }
 
+/*
+remove top directory and slash
+*/
 func removeTopDirectoryAndBeginSlashAndEndingSlash(directory string, path string) string {
 	path = strings.TrimPrefix(path, directory)
 	path = strings.TrimSuffix(path, "/")
@@ -69,6 +81,9 @@ func removeTopDirectoryAndBeginSlashAndEndingSlash(directory string, path string
 	return path
 }
 
+/*
+checking entry is top directory or not
+*/
 func isTopTreeDirectory(path string) bool {
 	return path == ""
 }
