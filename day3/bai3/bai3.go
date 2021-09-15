@@ -46,12 +46,12 @@ func printFile(directory string, ignoreDirs []string) filepath.WalkFunc {
 			}
 		}
 
-		fmt.Println(formatPrintingPath(directory, path, info))
+		fmt.Println(formatPrintingPath(directory, path))
 		return nil
 	}
 }
 
-func formatPrintingPath(directory string, path string, info os.FileInfo) string {
+func formatPrintingPath(directory string, path string) string {
 	formatPath := removeTopDirectoryAndBeginSlashAndEndingSlash(directory, path)
 	if isTopTreeDirectory(formatPath) {
 		return filepath.Base(path)
@@ -59,11 +59,7 @@ func formatPrintingPath(directory string, path string, info os.FileInfo) string 
 
 	nestedLevel := strings.Count(formatPath, "/")
 
-	if info.IsDir() {
-		return strings.Repeat("│   ", nestedLevel-1) + fmt.Sprintf("├── %s", filepath.Base(formatPath))
-	}
-
-	return strings.Repeat("│   ", nestedLevel-1) + fmt.Sprintf("└── %s", filepath.Base(formatPath))
+	return strings.Repeat("│   ", nestedLevel-1) + fmt.Sprintf("├── %s", filepath.Base(formatPath))
 }
 
 func removeTopDirectoryAndBeginSlashAndEndingSlash(directory string, path string) string {
