@@ -16,3 +16,4 @@ services:
       environment:
         PGADMIN_DEFAULT_EMAIL: root@techmaster.vn
         PGADMIN_DEFAULT_PASSWORD: 123
+        
