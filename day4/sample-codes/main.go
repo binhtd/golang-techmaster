@@ -32,5 +32,36 @@ func main() {
 
 	//demoChannel12()
 	//demoChannel13()
-	demoChannel14()
+	//demoChannel14()
+
+	//demoDefer()
+
+	//demoRecover()
+	//demoCollectionFunc()
+
+	//demoStringFormat()
+
+	//demoStringFunc()
+
+	//demoRegularExpression()
+
+	//demoTime()
+
+	//demoEpoch()
+	//demoNumberParse()
+
+	//demoUrlParsing()
+	//demoSha1Hashes()
+
+	//demoBase64Encoding()
+	//demoEnv()
+
+	//demoHttp()
+	//demoHttpClient()
+
+	//demoCommandLineFlag()
+
+	//demoSubCommand()
+
+	demoContext()
 }
