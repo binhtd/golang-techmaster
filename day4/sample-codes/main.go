@@ -25,5 +25,7 @@ func main() {
 
 	//demoChannel9()
 
-	demoChannel10()
+	//demoChannel10()
+
+	demoAtomicCounter()
 }
