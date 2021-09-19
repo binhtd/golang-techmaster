@@ -246,3 +246,249 @@ func demoAtomicCounter() {
 	wg.Wait()
 	fmt.Println("ops:", ops)
 }
+
+func demoChannel11() {
+	/*
+		pipe := make(chan string)
+		pipe <- "water"
+	*/
+	//fatal error: all goroutines are asleep - deadlock!
+
+	/*
+		pipe := make(chan string)
+		pipe <- "water"
+		receiver := <-pipe
+		fmt.Println(receiver)
+	*/
+	//fatal error: all goroutines are asleep - deadlock!
+
+	/*
+		pipe := make(chan string)
+		go func() {
+			pipe <- "water"
+		}()
+
+		receiver := <-pipe
+		fmt.Println(receiver)
+	*/
+	/*
+		pipe := make(chan string, 1)
+		pipe <- "water"
+		receiver := <-pipe
+		fmt.Println(receiver)
+	*/
+	/*
+		pipe := make(chan string, 1)
+		pipe <- "water"
+		pipe <- "water"
+		receiver := <-pipe
+		fmt.Println(receiver)
+	*/
+	//fatal error: all goroutines are asleep - deadlock!
+
+	/*
+		pipe := make(chan string, 2)
+		pipe <- "water"
+		pipe <- "water"
+		receiver := <-pipe
+		fmt.Println(receiver)
+		receiver = <-pipe
+		fmt.Println(receiver)
+	*/
+	/*
+		pipe := make(chan string, 2)
+		pipe <- "water"
+		pipe <- "water"
+		for receiver := range pipe {
+			fmt.Println(receiver)
+		}
+	*/
+	/*
+		pipe := make(chan string, 2)
+		pipe <- "water"
+		pipe <- "water"
+		close(pipe)
+		for receiver := range pipe {
+			fmt.Println(receiver)
+		}
+	*/
+	pipe := make(chan string, 2)
+	go func() {
+		pipe <- "Water"
+		pipe <- "water"
+		close(pipe)
+	}()
+
+	for receiver := range pipe {
+		fmt.Println(receiver)
+	}
+}
+
+func demoChannel12() {
+	/*
+		pipe := make(chan string)
+		go func() { //1
+			for receiver := range pipe { //2
+				fmt.Println(receiver) //3
+			}
+		}()
+		pipe <- "water 1" //4
+		close(pipe)
+	*/
+
+	/*
+		pipe := make(chan string)
+		go func() {
+			for receiver := range pipe {
+				fmt.Println(receiver)
+			}
+		}()
+		pipe <- "water 1"
+		close(pipe)
+		time.Sleep(time.Millisecond)
+	*/
+	pipe := make(chan string)
+	done := make(chan bool)
+
+	go func() {
+		for {
+			receiver, more := <-pipe
+			fmt.Println(receiver)
+			if !more {
+				done <- true
+				time.Sleep(time.Millisecond)
+				fmt.Println("Print me out")
+			}
+		}
+	}()
+	pipe <- "water"
+	close(pipe)
+	<-done
+}
+
+/*
+type Queuable interface {
+	Handle() error
+}
+
+type Worker struct {
+	Name       string
+	WorkerPool chan chan Queuable
+	JobChannel chan Queuable
+	quit       chan bool
+}
+
+var JobQueue chan Queuable
+
+type Dispatcher struct {
+	maxWorkers int
+	WorkerPool chan chan Queuable
+	Workers    []Worker
+}
+
+func NewDispather(maxWorkers int) *Dispatcher {
+	if JobQueue == nil {
+		JobQueue = make(chan Queuable, 10)
+	}
+
+	pool := make(chan chan Queuable, maxWorkers)
+	return &Dispatcher{WorkerPool: pool, maxWorkers: maxWorkers}
+}
+
+func (d *Dispatcher) Run() {
+	for i := o; i < d.maxWorkers; i++ {
+		worker := NewWorker(d.WorkerPool)
+		worker.Start()
+		d.Workers = append(d.Workers, worker)
+	}
+}
+
+func (d *Dispatcher) dispatch() {
+	for {
+		select {
+		case job := <-JobQueue:
+			go func(job Queuable) {
+				jobChannel := <-d.WorkerPool
+				jobChannel <- job
+			}(job)
+		}
+	}
+}
+
+func (W Worker) Start() {
+	go func() {
+		for {
+			select {
+			case job := <-W.JobChannel:
+				if err := job.Handle(); err != nil {
+					fmt.Printf("Error in job: %s\n", err.Error())
+				}
+			}
+		}
+	}()
+}
+
+type Email struct {
+	To      string `json:"to"`
+	From    string `json:"from"`
+	Subject string `json:"subject"`
+	Content string `json:"content"`
+}
+
+func (e Email) Handle() error {
+	r := rand.Intn(200)
+	time.Sleep(time.Duration(r) * time.Millisecond)
+	return nil
+}
+
+type EmailService struct {
+	Queue chan queue.Queuable
+}
+
+func NewEmailService(q chan queue.Queuable) *EmailService {
+	service := &EmailService{
+		Queue: q,
+	}
+	return service
+}
+
+func (s EmailService) Send(e Email) {
+	s.Queue <- e
+}
+*/
+
+func demoChannel13() {
+	requests := make(chan int, 5)
+	for i := 1; i <= 5; i++ {
+		requests <- i
+	}
+	close(requests)
+	limiter := time.Tick(200 * time.Millisecond)
+
+	for req := range requests {
+		<-limiter
+		fmt.Println("request", req, time.Now())
+	}
+
+	burstyLimiter := make(chan time.Time, 3)
+
+	for i := 0; i < 3; i++ {
+		burstyLimiter <- time.Now()
+	}
+
+	go func() {
+		for t := range time.Tick(200 * time.Microsecond) {
+			burstyLimiter <- t
+		}
+	}()
+
+	burstyRequests := make(chan int, 5)
+	for i := 1; i <= 5; i++ {
+		burstyRequests <- i
+	}
+	close(burstyRequests)
+	for req := range burstyRequests {
+		<-burstyLimiter
+		fmt.Println("request", req, time.Now())
+	}
+}

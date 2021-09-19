@@ -27,5 +27,10 @@ func main() {
 
 	//demoChannel10()
 
-	demoAtomicCounter()
+	//demoAtomicCounter()
+	// demoChannel11()
+
+	//demoChannel12()
+	demoChannel13()
+
 }
