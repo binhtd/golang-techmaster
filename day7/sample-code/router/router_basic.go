@@ -44,14 +44,15 @@ func returnXml(w http.ResponseWriter, r *http.Request) {
 		{Id: 2, Name: "Trịnh Văn B"},
 		{Id: 3, Name: "Ngô Thị C"},
 	}
-	studentsXml, err := xml.Marshal(students)
 
+	studetsXml, err := xml.Marshal(students)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/xml")
-	w.Write(studentsXml)
+	w.Write(studetsXml)
 }
 
 func returnHtml(w http.ResponseWriter, r *http.Request) {
