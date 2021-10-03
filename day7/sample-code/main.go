@@ -1,6 +1,8 @@
 package main
 
-import "day7-sample-code/querystring"
+import (
+	"day7-sample-code/router"
+)
 
 func main() {
 	//go_template.DemoTemplate()
@@ -8,5 +10,6 @@ func main() {
 	//middleware.DemoMiddleWare()
 	//querystring.DemoQueryString()
 	//querystring.DemoQueryStringWithTemplate()
-	querystring.DemoQueryStringWithBooks()
+	//querystring.DemoQueryStringWithBooks()
+	router.DemoRouter()
 }
